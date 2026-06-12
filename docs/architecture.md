@@ -56,7 +56,7 @@ Layered and dependency-injected: thin routers resolve the user and delegate to
 controllers, which orchestrate domain logic over clients (HTTP to Navidrome/beets)
 and handlers (filesystem + Docker side effects). A lifespan watcher provides the
 "drop a file in a watch dir and it auto-imports" path. Full treatment:
-`../pymix/.claude/docs/architecture.md`.
+`../pymix/docs/architecture.md`.
 
 ## Per-user container topology
 
@@ -65,7 +65,7 @@ pymix spins up **one stack per user** (created on `POST /user/create`). Names fo
 pymix talks to them over the Docker network and runs `beet` commands via
 `docker.execute(...)`. The compose/env files for these live outside the repos, under
 the mounted `/subbox` volume. Authoritative table:
-`../pymix/.claude/docs/architecture.md` §"Container topology".
+`../pymix/docs/architecture.md` §"Container topology".
 
 ## The unit of identity: `subbox_id`
 
@@ -83,7 +83,7 @@ client uploads files (filebrowser)  ──►  pymix stages to beets data dir
    ──►  client browses Navidrome and sees the new library + playlists
 ```
 
-Step-by-step with exact paths and endpoints: `../pymix/.claude/docs/workflows.md`.
+Step-by-step with exact paths and endpoints: `../pymix/docs/workflows.md`.
 
 ## Where to go next
 

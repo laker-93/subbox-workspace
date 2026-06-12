@@ -11,7 +11,7 @@ feature lives in.
 | Pure UI / playback / routing / theming | `subbox-app` only | `../subbox-app/CLAUDE.md`, `../subbox-app/docs/ARCHITECTURE.md` |
 | A music-server capability for all of Jellyfin/Navidrome/Subsonic | `subbox-app` only (`ControllerEndpoint`) | `../subbox-app/docs/ARCHITECTURE.md` §2 |
 | A native/OS behaviour (MPV, media keys, file open) | `subbox-app` only (main+preload+renderer) | `../subbox-app/docs/ARCHITECTURE.md` §1 |
-| A library transform / import / export / orchestration / schema change | `pymix` only | `../pymix/CLAUDE.md`, `../pymix/.claude/docs/{workflows,data-model,api}.md` |
+| A library transform / import / export / orchestration / schema change | `pymix` only | `../pymix/CLAUDE.md`, `../pymix/docs/{workflows,data-model,api}.md` |
 | A DJ-workflow feature with new backend behaviour surfaced in the UI | **both** | `docs/integration.md` + both repos |
 
 If unsure, sketch the data flow against `docs/architecture.md` and find which arrows
@@ -26,7 +26,7 @@ feature and mirror it:
   `routes/queries/mutations/components` shape. The add-a-feature cheat sheet in
   `../subbox-app/CLAUDE.md` lists the four common shapes.
 - pymix: trace one existing request flow end to end
-  (`../pymix/.claude/docs/architecture.md` has a worked example) before adding a
+  (`../pymix/docs/architecture.md` has a worked example) before adding a
   parallel one.
 
 ## Step 2 — implement
@@ -55,7 +55,7 @@ Full detail: `../subbox-app/CLAUDE.md` + `../subbox-app/docs/ARCHITECTURE.md`.
 4. Never bypass `subbox_id` tagging on a new ingest path.
 5. Run the tests (`pymix/pytest.ini`).
 
-Full detail: `../pymix/CLAUDE.md` + `../pymix/.claude/docs/{architecture,workflows,data-model,dev}.md`.
+Full detail: `../pymix/CLAUDE.md` + `../pymix/docs/{architecture,workflows,data-model,dev}.md`.
 
 ### Cross-repo feature
 Follow the **lockstep checklist** in `docs/integration.md` — backend route + logic
@@ -69,7 +69,7 @@ UI. Ship them as a paired feature branch in each repo.
   so check those if your code branches on `is-electron`.
 - pymix: it runs inside Docker with the socket and `/subbox` volume mounted (it can't
   fully run standalone). Use the dev_sandbox scripts and tests
-  (`../pymix/.claude/docs/dev.md`).
+  (`../pymix/docs/dev.md`).
 - Cross-repo: point the running client at the running backend and exercise the full
   round trip. A passing typecheck does not prove the HTTP contract matches — the Zod
   parse can still fail at runtime.

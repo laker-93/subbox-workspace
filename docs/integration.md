@@ -20,7 +20,7 @@ seam so you know exactly what to touch on each side.
 - CORS allows the subbox web origins with credentials; methods limited to
   GET/POST/DELETE/OPTIONS.
 - Endpoints are grouped by router in `pymix/routers/`. The full catalogue is in
-  `../pymix/.claude/docs/api.md` — treat that as the source of truth for what exists.
+  `../pymix/docs/api.md` — treat that as the source of truth for what exists.
 
 ### Client — subbox-app (`../subbox-app`)
 The pymix client is a subbox-only service, **outside** the music-server controller
@@ -56,7 +56,7 @@ synchronous result for import/export — model it as job + poll on both sides.
   prefix.
 - **User resolution.** Send the `session_id` cookie (with credentials) or a
   `username`. The backend's routers copy a guard block verbatim to resolve the user —
-  match it when you add a route. (`../pymix/.claude/docs/api.md`,
+  match it when you add a route. (`../pymix/docs/api.md`,
   `../pymix/CLAUDE.md` "User resolution pattern".)
 - **Response shape is not uniform.** Older pymix endpoints return a plain dict
   `{"success": bool, "reason": str, ...}` and swallow errors into `reason`; newer
@@ -77,8 +77,8 @@ When a feature needs new backend behaviour:
    add a new provider in `containers.py` and wire the module in `registration.py` if
    you introduced a router.
 3. If it persists data: new Alembic revision **and** matching ORM model
-   (`../pymix/.claude/docs/data-model.md`, `dev.md`).
-4. Update `../pymix/.claude/docs/api.md`.
+   (`../pymix/docs/data-model.md`, `dev.md`).
+4. Update `../pymix/docs/api.md`.
 
 **In `../subbox-app`:**
 5. Add request/response **Zod** schemas in `src/shared/api/pymix/pymix-types.ts`.
@@ -98,6 +98,6 @@ contract matches. See `docs/adding-a-feature.md` for the full procedure.
   client "still compiles" — the Zod parse will fail at runtime. Change both sides in
   one feature branch pair.
 - Auth differs per endpoint (cookie vs. Bearer vs. username). Check
-  `../pymix/.claude/docs/api.md` for the specific endpoint before assuming.
+  `../pymix/docs/api.md` for the specific endpoint before assuming.
 - `subbox_id` is the join key for track-level data. If your feature correlates tracks
   across systems, key off `subbox_id`, not paths or titles.

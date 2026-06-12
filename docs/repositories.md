@@ -55,11 +55,11 @@ The package name `pymix` is legacy; the product is "subbox" (`sub-box.net`).
 | File | Covers |
 |---|---|
 | `../pymix/CLAUDE.md` | Orientation, the `subbox_id` concept, architecture paragraph, load-bearing conventions, rough edges, do-nots. |
-| `../pymix/.claude/docs/architecture.md` | Layers, DI wiring, lifespan/watcher, per-user container topology, external services, a request-flow example. |
-| `../pymix/.claude/docs/api.md` | Every HTTP endpoint by router. |
-| `../pymix/.claude/docs/data-model.md` | DB tables, domain models, the `subbox_id` mapping. |
-| `../pymix/.claude/docs/workflows.md` | Import/export/sync/watch flows end to end; storage/staging paths. |
-| `../pymix/.claude/docs/dev.md` | How to run, test, migrate; the dev_sandbox scripts. |
+| `../pymix/docs/architecture.md` | Layers, DI wiring, lifespan/watcher, per-user container topology, external services, a request-flow example. |
+| `../pymix/docs/api.md` | Every HTTP endpoint by router. |
+| `../pymix/docs/data-model.md` | DB tables, domain models, the `subbox_id` mapping. |
+| `../pymix/docs/workflows.md` | Import/export/sync/watch flows end to end; storage/staging paths. |
+| `../pymix/docs/dev.md` | How to run, test, migrate; the dev_sandbox scripts. |
 
 ---
 
@@ -71,6 +71,6 @@ The package name `pymix` is legacy; the product is "subbox" (`sub-box.net`).
 | The HTTP contract between client and backend | this workspace: `docs/integration.md` |
 | How a renderer feature is structured | `../subbox-app/docs/ARCHITECTURE.md` §2–§6 |
 | The pymix client inside the app | `../subbox-app/src/renderer/api/pymix/` + `../subbox-app/src/shared/api/pymix/pymix-types.ts` |
-| What a pymix endpoint does | `../pymix/.claude/docs/api.md` |
-| How a library transform actually runs | `../pymix/.claude/docs/workflows.md` |
-| DB schema / migrations | `../pymix/.claude/docs/data-model.md` + `../pymix/.claude/docs/dev.md` |
+| What a pymix endpoint does | `../pymix/docs/api.md` |
+| How a library transform actually runs | `../pymix/docs/workflows.md` |
+| DB schema / migrations | `../pymix/docs/data-model.md` + `../pymix/docs/dev.md` |

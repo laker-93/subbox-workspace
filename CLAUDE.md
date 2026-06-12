@@ -51,7 +51,7 @@ here):
 
 - `subbox-app`: `../subbox-app/CLAUDE.md`, `../subbox-app/docs/ARCHITECTURE.md`,
   `../subbox-app/docs/ENV_SETTINGS.md`.
-- `pymix`: `../pymix/CLAUDE.md`, `../pymix/.claude/docs/{architecture,api,data-model,workflows,dev}.md`.
+- `pymix`: `../pymix/CLAUDE.md`, `../pymix/docs/{architecture,api,data-model,workflows,dev}.md`.
 
 ## Division of labour (where does my change go?)
 
