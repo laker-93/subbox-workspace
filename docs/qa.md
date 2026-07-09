@@ -85,6 +85,14 @@ not in the snapshot scripts.
 > bakes in the real prod pymix URL (`pymix.sub-box.net`) instead of the local
 > stack (`pymix.docker.localhost`).
 
+A dev build's **local library** is isolated to `~/Library/Application
+Support/subbox-dev/music` (the `-dev` suffix `getAppPath()` applies when
+`NODE_ENV === 'development'`), separate from a staging/prod `subbox/music`
+collection on the same machine — so the loop can drive sync download/export
+without touching a real personal library. It starts empty and populates via
+download (the populated test libraries live server-side in the per-user
+`navidrome<user>` containers, not this local mirror).
+
 Known local dev test account (in `.env.ui-snapshot.local`, gitignored):
 `test260526` / `1234test260526` — matches the `navidrometest260526` /
 `beetstest260526` containers and has a real populated library, so it's good for
