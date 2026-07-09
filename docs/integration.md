@@ -5,8 +5,8 @@ HTTP to the **pymix FastAPI backend**. Any DJ-workflow feature that needs new se
 behaviour changes *both* sides, and they must stay in lockstep. This doc maps the
 seam so you know exactly what to touch on each side.
 
-> Music-server features (browse/playback/playlists across Jellyfin/Navidrome/
-> Subsonic) do **not** cross this seam — they use the in-app `ControllerEndpoint`
+> Music-server features (browse/playback/playlists on Navidrome/Subsonic) do
+> **not** cross this seam — they use the in-app `ControllerEndpoint`
 > abstraction and go straight to the server. See
 > `../subbox-app/docs/ARCHITECTURE.md` §2. This doc is only about the **pymix** path.
 

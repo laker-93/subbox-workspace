@@ -9,7 +9,7 @@ feature lives in.
 | If the feature is… | It touches… | Primary docs |
 |---|---|---|
 | Pure UI / playback / routing / theming | `subbox-app` only | `../subbox-app/CLAUDE.md`, `../subbox-app/docs/ARCHITECTURE.md` |
-| A music-server capability for all of Jellyfin/Navidrome/Subsonic | `subbox-app` only (`ControllerEndpoint`) | `../subbox-app/docs/ARCHITECTURE.md` §2 |
+| A music-server capability for Navidrome/Subsonic | `subbox-app` only (`ControllerEndpoint`) | `../subbox-app/docs/ARCHITECTURE.md` §2 |
 | A native/OS behaviour (MPV, media keys, file open) | `subbox-app` only (main+preload+renderer) | `../subbox-app/docs/ARCHITECTURE.md` §1 |
 | A library transform / import / export / orchestration / schema change | `pymix` only | `../pymix/CLAUDE.md`, `../pymix/docs/{workflows,data-model,api}.md` |
 | A DJ-workflow feature with new backend behaviour surfaced in the UI | **both** | `docs/integration.md` + both repos |
@@ -34,7 +34,8 @@ feature and mirror it:
 ### subbox-app-only feature
 1. Music-server capability → add method to `ControllerEndpoint`
    (`src/shared/types/domain-types.ts`), implement in each
-   `src/renderer/api/{jellyfin,navidrome,subsonic}/*-controller.ts` (make optional if
+   `src/renderer/api/{navidrome,subsonic}/*-controller.ts` (the Jellyfin controller
+   is upstream leftover — never a requirement; make the method optional if
    not all servers support it), add a React Query hook + query keys.
 2. New page → `AppRoute` enum (`src/renderer/router/routes.ts`) +
    `app-router.tsx` + `features/<x>/routes/<x>-route.tsx`.

@@ -1,24 +1,33 @@
 # Repositories
 
-The subbox platform spans two repos, both siblings of this workspace. Resolve them
-with relative paths; do not hardcode an absolute root (clones differ per machine).
+The subbox platform is built from two core repos — the client (`subbox-app`) and the
+backend (`pymix`) — plus `subbox-slskd`, a standalone satellite of tooling that
+consumes the pymix API. All are siblings of this workspace. Resolve them with
+relative paths; do not hardcode an absolute root (clones differ per machine).
 
 ```
 ../subbox-app    git@github.com:laker-93/subbox-app.git
 ../pymix         git@github.com:laker-93/pymix.git
+../subbox-slskd  git@github.com:laker-93/subbox-slskd.git   (satellite: Soulseek wishlist tooling)
 ```
 
 For anything repo-specific, **read that repo's own docs** — this workspace only holds
 cross-cutting context.
+
+> **Naming note:** on this machine, `subbox-app` is cloned as `../feishin` (its
+> directory name from before the `laker-93/subbox-app` fork was renamed) — same
+> repo, same remote. If `../subbox-app` doesn't exist, look for `../feishin`.
 
 ---
 
 ## `../subbox-app` — the client
 
 Electron + React 19 desktop music player (also builds to web and a remote-control
-app). Fork of [Feishin](https://github.com/jeffvli/feishin). Plays from Jellyfin,
-Navidrome, and Subsonic/OpenSubsonic, and adds the DJ-workflow UI (pymix import,
-sync, sharing, filebrowser).
+app). Fork of [Feishin](https://github.com/jeffvli/feishin). Plays from Navidrome
+and Subsonic/OpenSubsonic, and adds the DJ-workflow UI (pymix import, sync,
+sharing, filebrowser). Upstream's Jellyfin controller is still in the tree, but
+Subbox only ever targets Navidrome/Subsonic — Jellyfin must not drive design
+decisions.
 
 - **Stack:** React 19 + TypeScript, `electron-vite`/`vite`, Mantine v8, TanStack
   React Query + Zustand. Package manager is **pnpm** (never npm/yarn).
@@ -63,6 +72,34 @@ The package name `pymix` is legacy; the product is "subbox" (`sub-box.net`).
 
 ---
 
+## `../subbox-slskd` — Soulseek wishlist tooling (satellite)
+
+Standalone scripts, extracted from `pymix`, that fill gaps in a user's library over
+[Soulseek](https://www.slsknet.org/) via [slskd](https://github.com/slskd/slskd).
+They're a separate repo so they can be handed to end users without the rest of the
+platform, and they talk to Subbox/pymix, Navidrome and slskd **purely over HTTP** —
+no pymix imports, no shared code.
+
+- **Stack:** one Python script (standard library only — runs on a bare `python3`,
+  no `pip install`) plus install-and-run shell/PowerShell scripts.
+- **Scripts (all under `../subbox-slskd/scripts/`):**
+  | Script | What it does |
+  |---|---|
+  | `run-slskd-macos.sh` | Install (if needed) and run slskd on macOS; arch (Apple Silicon vs Intel) auto-detected from `uname -m`. Prompts once for Soulseek creds + download/share dirs, caches them, verifies login, prints the ready-to-run `download_wishlist.py` command. |
+  | `run-slskd-windows.ps1` | The same install-and-run flow for Windows (x64). |
+  | `download_wishlist.py` | Reads the pymix **wishlist API** (what you want), checks Navidrome via the Subsonic search API (what you have), downloads the missing tracks through slskd into the Subbox watch dir, and flips each item to `downloaded` via `PATCH /wishlist/{id}`. |
+
+**How it links to pymix:** it is a *client* of the pymix wishlist API — the same
+seam covered in `docs/integration.md`. It only ever moves items to `downloaded`;
+pymix's own reconcile loop (`services/wishlist_reconcile_service.py`, the in-pymix
+equivalent of this script's presence-check) promotes `downloaded` → `available`
+once beets imports the file and Navidrome can match it. So a change to the wishlist
+schema or status flow in pymix may need a matching change here.
+
+**Its docs:** `../subbox-slskd/README.md`.
+
+---
+
 ## Quick "where do I look?" index
 
 | I need to understand… | Go to |
@@ -74,3 +111,5 @@ The package name `pymix` is legacy; the product is "subbox" (`sub-box.net`).
 | What a pymix endpoint does | `../pymix/docs/api.md` |
 | How a library transform actually runs | `../pymix/docs/workflows.md` |
 | DB schema / migrations | `../pymix/docs/data-model.md` + `../pymix/docs/dev.md` |
+| How to build/push images and deploy to staging/prod | this workspace: `docs/deployment.md` |
+| The slskd/Soulseek run scripts or the wishlist downloader | `../subbox-slskd/README.md` + `../subbox-slskd/scripts/` |

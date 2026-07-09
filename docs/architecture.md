@@ -12,7 +12,7 @@ links into that repo's own docs — they are authoritative and kept current ther
 │                                                              │
 │   renderer (React)                                           │
 │     ├─ music-server controllers ──HTTP──► Navidrome/Subsonic │ playback, browse
-│     │   (Jellyfin/Navidrome/Subsonic, one ControllerEndpoint)│
+│     │   (Navidrome/Subsonic only, one ControllerEndpoint)    │
 │     └─ pymix + filebrowser API clients ──HTTP──┐             │ DJ workflows
 └────────────────────────────────────────────────┼────────────┘
                                                   │ the pymix API seam
