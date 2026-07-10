@@ -40,7 +40,8 @@ cycle; they are the source of truth and contain the hard rules.
 | File | What it is | Which worktree |
 |---|---|---|
 | `README.md` | Mission, hard rules, and a feature/workflow **coverage checklist** | both |
-| `directives.md` | **User-steered focus.** Checked *first*, every cycle — a PENDING/IN-PROGRESS entry always beats the loop's own rotation | client only |
+| `directives.md` | **User-steered focus.** Checked *first*, every cycle — a PENDING/IN-PROGRESS entry always beats the loop's own rotation. Kept lean: only PENDING/IN-PROGRESS live here | client only |
+| `directives-archive.md` | Completed directives, compacted to one line + a link to the feature doc. **The loop never reads it** — inert history for a human | client only |
 | `bugs.md` | Correctness bugs, `OPEN` (unverified/risky/cross-repo) vs `FIXED` (links commit) | both |
 | `ux-notes.md` | UX friction — rough-but-working, not outright wrong; `OPEN` / `RESOLVED` / `IMPROVED` | client only |
 | `features/*.md` | One file per feature/workflow, **written only once actually driven and verified** (not from reading source) — treated as ground truth for "expected behavior" thereafter | both |
@@ -51,20 +52,27 @@ cycle; they are the source of truth and contain the hard rules.
 Add a directive in `../feishin-qa/docs/qa/directives.md` (either tell the running
 loop session directly, or edit the file's `PENDING` section by hand). A directive
 can be a large multi-step journey; the loop breaks it into sub-steps across
-cycles and only moves it to `DONE` once verified end-to-end.
+cycles and only retires it to `directives-archive.md` (a one-line + link entry)
+once verified end-to-end.
 
 ## One cycle, in order
 
 1. **Pick the work** — first match wins: client `directives.md` IN PROGRESS →
    PENDING → an `OPEN` entry in either `bugs.md`/`ux-notes.md` → next unchecked
-   item on a README coverage checklist. Don't grind one repo when the other has
-   open items.
+   item on a README coverage checklist → **self-directed discovery** (once all
+   of the above are exhausted): a regression sweep of the oldest-verified
+   feature, edge/error-state probing of a covered happy path, and expanding the
+   checklist with sub-flows it finds. So the loop never runs dry — with no user
+   directive it keeps discovering its own work. Don't grind one repo when the
+   other has open items.
 2. **Get a real app to drive** (see below) — actually click/fill/sync, don't just
    screenshot.
 3. **Fix conservatively, or log it.** A fix ships only if it's confidently
-   root-caused, single-repo, and re-verified by re-running the exact flow. Else it
-   goes to `bugs.md`/`ux-notes.md` as `OPEN`. Cross-repo issues are **logged on
-   both sides, never fixed one-sidedly.**
+   root-caused and re-verified by re-running the exact flow. A single-repo fix is
+   one commit on that repo. A **cross-repo** fix is now allowed too, but only as a
+   coordinated pair verified end-to-end with *both* sides live (see the hard rule
+   below); if you can't verify both sides this cycle, log both `bugs.md` files as
+   `OPEN` instead.
 4. **Write it down** — update the relevant `features/*.md`, the directive notes,
    and append one line to `log.md`. Kill any Electron/browser process you spawned.
 
@@ -119,11 +127,26 @@ source — editing `../pymix-qa` does nothing until you rebuild. To verify a fix
   exposed the issue. Anything uncertain, subjective, or cross-repo is logged, not
   committed.
 - **One fix commit per cycle, per repo, max**, on `claude/continuous-ux` only.
-- **Never push, never open a PR, never merge** to `development`/`main`. The user
-  reviews and pushes manually.
+- **Open a PR per verified fix; never merge.** After committing a verified fix to
+  `claude/continuous-ux`, cut a clean PR branch off the real base and open **one PR
+  per fix** (`qa-runner/open-pr.sh` does the cherry-pick-into-a-throwaway-worktree +
+  push + `gh pr create`): base `development` for subbox-app, `main` for pymix. Label
+  it `qa-auto`, record the PR URL in the matching `bugs.md` `FIXED` entry. **Never
+  merge, never force-push a shared branch.** The user reviews and merges on GitHub;
+  the next daily run syncs the merged code back (`qa-runner/sync-merged.sh` rebases
+  `claude/continuous-ux` onto the updated base, dropping the merged fix). A
+  cross-repo fix opens **two PRs, cross-linked and merged together.**
 - **Never touch staging or prod.** Local dev stack only. Never run destructive DB
   ops or write to a real user's per-user container.
 - **Never bypass `SUBBOX_ID` tagging** on the pymix side (see root `CLAUDE.md`).
-- **Cross-repo bugs are logged on both sides, never fixed one-sidedly** — a pymix
-  fix that needs a matching subbox-app change (or vice versa) is one feature; log
-  both `bugs.md` files and stop.
+- **Cross-repo fixes ship as a coordinated pair, never one-sided.** A pymix fix
+  that needs a matching subbox-app change (or vice versa) is one feature: implement
+  both sides (one commit per repo, each on its own `claude/continuous-ux` branch)
+  and commit them **only** after re-driving the full flow with *both* changes live
+  — rebuild the pymix image to `laker93/pymix:qa-local` and swap the running
+  container **and** rebuild the Electron client, then reproduce the original symptom
+  and confirm it's gone. If you can't verify both sides end-to-end this cycle (e.g.
+  the shared `pymix` container is busy with the user's manual testing, or the flow
+  won't drive), fall back to logging both `bugs.md` files as `OPEN` and stop — the
+  verify-before-commit gate is absolute. Record both commit SHAs in both `bugs.md`
+  files (mark them `FIXED`).
