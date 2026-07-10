@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.subbox.qa-runner</string>
+
+  <!-- Adjust the path if this repo lives elsewhere on this machine. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lukepurnell/workspace/subbox-workspace/qa-runner/run-daily.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lukepurnell/workspace/subbox-workspace</string>
+
+  <!-- launchd gives a bare env; give claude/docker/git a usable PATH. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/lukepurnell/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <!-- Run once a day at 03:00. If the Mac is asleep at 03:00, launchd runs it
+       on next wake. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>3</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lukepurnell/workspace/subbox-workspace/qa-runner/state/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lukepurnell/workspace/subbox-workspace/qa-runner/state/launchd.err.log</string>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

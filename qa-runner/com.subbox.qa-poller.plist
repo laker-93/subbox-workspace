@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.subbox.qa-poller</string>
+
+  <!-- Cheap inbound poll: files your Discord messages as directives and answers
+       `status` / `pause` / `resume`. No `claude`, so it's fine to run often. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lukepurnell/workspace/subbox-workspace/qa-runner/pull-directives.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lukepurnell/workspace/subbox-workspace</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/lukepurnell/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <!-- Every 15 seconds — snappy `status`/`pause`/`resume` replies (cheap: no
+       `claude`, just a Discord fetch + tiny python). -->
+  <key>StartInterval</key>
+  <integer>15</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lukepurnell/workspace/subbox-workspace/qa-runner/state/poller.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lukepurnell/workspace/subbox-workspace/qa-runner/state/poller.err.log</string>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
