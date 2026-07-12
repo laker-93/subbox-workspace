@@ -34,6 +34,7 @@ PAUSE_FLAG="$STATE_DIR/paused"
 : "${QA_FEISHIN_BASE:=development}"   # subbox-app PR base
 : "${QA_PYMIX_BASE:=main}"           # pymix PR base
 : "${QA_PR_LABEL:=qa-auto}"          # label on every PR the loop opens
+: "${QA_BUG_LABEL:=qa-bug}"          # label on every issue the loop files for a bug
 
 discord_post() { python3 "$QA_DIR/discord.py" post "$QA_DISCORD_CHANNEL_ID" "$1"; }
 

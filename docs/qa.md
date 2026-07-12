@@ -6,6 +6,28 @@ bugs and small UX friction conservatively, and writes down what it verified so
 the next run doesn't start from zero. This doc is the cross-repo orientation for
 it; the loop's own operating rules live in the journals it reads (below).
 
+But the same machinery is **reusable outside the loop**: while building a feature
+you can point a QA test at your working-tree code, and any reusable test you add
+is automatically picked up by the loop. That two-way reuse is the whole design —
+see "Reusing the framework beyond the loop" below.
+
+## The architecture, in layers
+
+The QA system is five layers, each decoupled from the next. The loop is only the
+top two; the lower three are the reusable substrate a feature developer shares
+with it.
+
+| Layer | Lives in | Role | Detail doc |
+|---|---|---|---|
+| **Orchestration** | `qa-runner/` (bash + `discord.py` + launchd) | Runs the loop unattended daily, files issues/PRs, syncs merged code back, bridges to Discord. Knows nothing about *what* a test does. | `qa-runner/README.md` |
+| **Loop policy** | `.claude/skills/continuous-ux/SKILL.md` | Defines one cycle: pick work → drive → fix/log → journal. | this doc + the skill |
+| **Persistent state** | `docs/qa/*` in each QA worktree | The loop's only memory: `bugs / ux-notes / features / log / directives`. | "The journals" below |
+| **Named test capabilities** | `test-<feature>` skills in `.claude/skills/` | Repeatable, pass/fail regressions for one feature — the reuse seam (below). | each skill's `SKILL.md` |
+| **Executable primitives** | `<worktree>/scripts/qa/*.mjs` + `scripts/ui-snapshot-shared.mjs` | The actual Playwright journeys and shared login/session/`resolveAppEntry` helpers every driver is built on. | "Driving the app" below |
+
+The orchestration layer (`qa-runner/`) is fully self-contained and documented in
+its own README — don't duplicate it here. This doc owns the middle three layers.
+
 ## The two moving parts
 
 **1. The skill.** `subbox-workspace/.claude/skills/continuous-ux/SKILL.md` defines
@@ -119,6 +141,63 @@ source — editing `../pymix-qa` does nothing until you rebuild. To verify a fix
 4. Note in `log.md` that you swapped the running container's tag.
 5. Run `pytest pymix/tests` (venv at `../pymix-qa/.venv`) before committing.
 
+## Reusing the framework beyond the loop
+
+The loop is not the only consumer of the QA drivers and test skills. The design is
+deliberately **bidirectional** — the same primitives serve a feature developer and
+the loop, so neither has to reinvent the other's tests.
+
+### Direction 1 — drive a QA test against the code you're editing
+
+Every driver in `../feishin-qa/scripts/qa/*.mjs` launches the Electron build via
+`resolveAppEntry()` (exported from `scripts/ui-snapshot-shared.mjs`). By default it
+launches **this worktree's** build (`feishin-qa/out/main/index.js`); set
+`QA_APP_ENTRY` to launch a build from anywhere else — most usefully an **uncommitted
+fix in your main dev checkout**:
+
+```bash
+# build your working-tree change (dev mode — bakes the LOCAL pymix URL)
+cd ../feishin && pnpm exec electron-vite build --mode development
+# run any QA journey against that build
+cd ../feishin-qa
+QA_APP_ENTRY=../feishin/out/main/index.js node scripts/qa/watch-download-concurrency.mjs
+```
+
+This is what makes a request like *"test the latest code against the concurrent
+upload/download case"* just work: the test lives in the QA worktree, but it drives
+**your** binary. `resolveAppEntry` is a shared convention — every driver honors
+`QA_APP_ENTRY`, not just one.
+
+### Direction 2 — reusable `test-<feature>` skills, shared both ways
+
+A skill named **`test-<feature>`** (e.g. `test-watch-download-concurrency`) is the
+reuse unit: a repeatable, pass/fail regression for one feature. Each one is three
+colocated pieces —
+
+- a driver at `../feishin-qa/scripts/qa/<feature>.mjs` (launches via `resolveAppEntry`),
+- a verified-behavior doc at `../feishin-qa/docs/qa/features/<feature>.md`,
+- the `SKILL.md` that ties them together and states the local-dev-only boundaries.
+
+Because it's a skill, **both** consumers reach it the same way:
+
+- **You**, mid-feature, invoke it by name to regression-check your change (Direction 1
+  applies — it can target your uncommitted build via `QA_APP_ENTRY`).
+- **The loop** enumerates `test-*` skills in its self-directed regression sweep
+  (`SKILL.md` Step 5) and rotates through them, preferring the one whose feature doc
+  was verified longest ago. **Any new `test-*` skill you add is therefore picked up
+  automatically — no change to the loop.**
+
+So the flow is symmetric: a regression you build while shipping a feature becomes a
+loop regression for free, and a driver the loop builds is one you can run by hand.
+When a directive has the loop build a durable new driver, it should wrap it as a
+`test-<feature>` skill for exactly this reason.
+
+> **Not every QA skill is a `test-*`.** Non-deterministic *exercisers* — e.g.
+> `wishlist-import-dev`, which seeds a wishlist and kicks off real Soulseek
+> downloads (dry-run/capped by default) — are intentionally **not** `test-*`: they
+> have no clean pass/fail. The loop invokes them situationally rather than as part
+> of the regression rotation. Reserve `test-<feature>` for repeatable assertions.
+
 ## Hard rules (do not relax — repeated from the journals)
 
 - **Bug fixes and small UX improvements only.** No new features, refactors, or
@@ -136,6 +215,14 @@ source — editing `../pymix-qa` does nothing until you rebuild. To verify a fix
   the next daily run syncs the merged code back (`qa-runner/sync-merged.sh` rebases
   `claude/continuous-ux` onto the updated base, dropping the merged fix). A
   cross-repo fix opens **two PRs, cross-linked and merged together.**
+- **Every bug is tracked as a GitHub issue.** When the loop logs a bug in a
+  `bugs.md`, it files an issue (`qa-runner/open-issue.sh`, label `qa-bug`) on the
+  real repo and records the URL as an `Issue:` line in the entry. A fix commit/PR
+  carries `Closes #<n>`, so merging it closes the issue — an open `qa-bug` issue
+  means "still broken in the base". Each cycle reconciles: any OPEN `bugs.md` entry
+  whose issue is now closed (a merged QA PR **or** a fix you pushed to the main
+  checkout yourself) is re-verified and moved to `FIXED`. This is how a bug you fix
+  by hand gets picked up and closed out without editing the journal manually.
 - **Never touch staging or prod.** Local dev stack only. Never run destructive DB
   ops or write to a real user's per-user container.
 - **Never bypass `SUBBOX_ID` tagging** on the pymix side (see root `CLAUDE.md`).

@@ -61,9 +61,11 @@ just an older directory name carried over from before the fork was renamed.
    feature.
 6. **`docs/deployment.md`** — the dev/staging/prod environments, the
    `laker93/pymix` and `laker93/player` images, and how to build and deploy them.
-7. **`docs/qa.md`** — the continuous-UX loop: the `continuous-ux` skill, the
-   `../pymix-qa` / `../feishin-qa` QA worktrees, and the on-disk journals that
-   carry state between cycles.
+7. **`docs/qa.md`** — the QA architecture in layers: the `continuous-ux` loop and
+   its `../pymix-qa` / `../feishin-qa` worktrees + journals, **and** the reusable
+   substrate under it — the `scripts/qa/` drivers (`QA_APP_ENTRY`/`resolveAppEntry`)
+   and `test-<feature>` skills you share with the loop when regression-testing your
+   own feature work.
 
 Then, for repo-specific detail, **read that repo's own docs** (do not duplicate them
 here):
@@ -82,6 +84,7 @@ here):
 | Music-server capability (Navidrome/Subsonic) | `subbox-app` only (the `ControllerEndpoint` abstraction) |
 | slskd/Soulseek run-and-install scripts, or the wishlist downloader that fetches missing tracks | `subbox-slskd` only (standalone; consumes the pymix wishlist API over HTTP) |
 | QA / continuous-UX loop work (driving the app, logging & conservatively fixing bugs and UX friction) | the `../pymix-qa` / `../feishin-qa` worktrees on branch `claude/continuous-ux`, via the `continuous-ux` skill. See `docs/qa.md`. |
+| Regression-testing a feature you're building (drive a QA journey against your working-tree code) | reuse the QA drivers: run `../feishin-qa/scripts/qa/*.mjs` with `QA_APP_ENTRY` pointing at your build, or invoke the matching `test-<feature>` skill. See `docs/qa.md` → "Reusing the framework beyond the loop". |
 
 ## Working principles for this platform
 

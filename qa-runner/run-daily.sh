@@ -4,6 +4,7 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 
 RUN_TS="$(date '+%Y-%m-%d %H:%M')"
+RUN_EPOCH="$(date +%s)"   # bugs filed at/after this are "this run" (see open-issue.sh)
 RUN_LOG_DIR="$STATE_DIR/logs/$(date '+%Y%m%d-%H%M%S')"
 mkdir -p "$RUN_LOG_DIR"
 ROOT="$(cd "$WORKSPACE/.." && pwd)"   # parent of all sibling repos
@@ -48,7 +49,11 @@ head_f=$(git -C "$FEISHIN_QA" rev-parse HEAD 2>/dev/null || echo none)
 head_p=$(git -C "$PYMIX_QA" rev-parse HEAD 2>/dev/null || echo none)
 
 stack_note=""
-docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^pymix$' || \
+# Bound the probe: a wedged Docker daemon must not hang the whole batch on a
+# non-essential pre-flight check (gtimeout, if available, else run unbounded).
+STACK_PROBE="docker ps --format {{.Names}}"
+command -v gtimeout >/dev/null 2>&1 && STACK_PROBE="gtimeout 10 $STACK_PROBE"
+$STACK_PROBE 2>/dev/null | grep -q '^pymix$' || \
   stack_note="⚠️ local stack (pymix container) not detected — cycles may be blocked."
 
 # --- 3. Run the cycles (each a fresh `claude -p`, per the loop's design) -------
@@ -81,6 +86,8 @@ logdelta_p=$(tail -n +"$((before_p + 1))" "$pymix_log" 2>/dev/null || true)
 blocked=$( { grep -hiE 'blocked' <<<"$logdelta_f$logdelta_p" || true; } )
 # PRs opened this run (open-pr.sh prints the URL into the cycle logs).
 prs=$( { grep -hoE 'https://github.com/[^ ]+/pull/[0-9]+' "$RUN_LOG_DIR"/cycle-*.log 2>/dev/null | sort -u || true; } )
+# Bug issues filed this run (open-issue.sh appends <epoch>\t<url>\t<slug> to issues.log).
+issues=$( { awk -F'\t' -v t="$RUN_EPOCH" 'NF>=2 && $1>=t {print $2}' "$STATE_DIR/issues.log" 2>/dev/null | sort -u || true; } )
 
 # --- 5. Compose + post the digest ---------------------------------------------
 {
@@ -88,6 +95,11 @@ prs=$( { grep -hoE 'https://github.com/[^ ]+/pull/[0-9]+' "$RUN_LOG_DIR"/cycle-*
   echo "Cycles completed: $completed/$QA_CYCLES"
   [[ -n "$stack_note" ]] && echo "$stack_note"
   echo
+  if [[ -n "$issues" ]]; then
+    echo "__Bugs filed this run — tracking on GitHub__"
+    echo "$issues"
+    echo
+  fi
   if [[ -n "$prs" ]]; then
     echo "__PRs opened — review & merge (I'll sync after you merge)__"
     echo "$prs"

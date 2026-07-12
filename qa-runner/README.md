@@ -27,23 +27,32 @@ launchd: qa-runner   (05:00 daily)
        ├─ sync-merged.sh   → rebase claude/continuous-ux onto development/main
        │                     (drops fixes whose PRs you merged; pulls new code)
        ├─ claude -p "/continuous-ux" × QA_CYCLES   (each a fresh cycle, local stack)
-       │     └─ per verified fix → commit → open-pr.sh → one PR (label qa-auto)
-       └─ discord.py post  → digest: cycles, PRs opened, commits, blocked items
+       │     ├─ per bug found      → open-issue.sh → one GitHub issue (label qa-bug)
+       │     └─ per verified fix   → commit (Closes #n) → open-pr.sh → one PR (qa-auto)
+       └─ discord.py post  → digest: cycles, bugs filed, PRs opened, commits, blocked
 ```
 
 Inbound reuses the loop's own steering surface: it **already reads `directives.md`
 first every cycle**, so a phone message just becomes a PENDING directive.
 
-## The bug → PR → merge → sync flow
+## The bug → issue → PR → merge → sync flow
 
-1. Loop finds a bug, fixes it, **verifies before committing** (re-drives the exact
-   flow; cross-repo = both sides live). Commits to `claude/continuous-ux`.
+0. Loop finds a bug → `open-issue.sh` files **one GitHub issue** on the real repo
+   (label `qa-bug`) and the loop records its URL as an `Issue:` line in `bugs.md`.
+   **Every bug gets an issue**, whether or not it's fixed the same cycle; the
+   `Issue:` link is the dedup key, so a later fresh-context cycle never re-files it.
+   Issues filed this run are listed (linked) in the Discord digest.
+1. Loop fixes it, **verifies before committing** (re-drives the exact flow;
+   cross-repo = both sides live). Commits to `claude/continuous-ux` with a
+   `Closes #<n>` line pointing at the issue.
 2. `open-pr.sh` cherry-picks that one commit onto a fresh branch off the real base
    (`development` for subbox-app, `main` for pymix) in a *throwaway* git worktree,
-   pushes, and opens **one PR per fix** (label `qa-auto`). The PR URL is posted to
-   Discord and recorded in `bugs.md`. A cross-repo fix opens **two cross-linked PRs**
-   that must be merged together.
-3. You review + merge on GitHub (from your phone).
+   pushes, and opens **one PR per fix** (label `qa-auto`). The commit body — and so
+   the `Closes #<n>` — carries into the PR. The PR URL is posted to Discord and
+   recorded in `bugs.md`. A cross-repo fix opens **two cross-linked PRs** (each
+   closing its own repo's issue) that must be merged together.
+3. You review + merge on GitHub (from your phone). Merging the PR **closes the
+   tracking issue** — so an open `qa-bug` issue means "not yet fixed in the base".
 4. The next daily run starts with `sync-merged.sh`: `git fetch` + rebase
    `claude/continuous-ux` onto the updated base. Your merged fix has the same
    patch-id upstream, so rebase **drops it** and pulls in the new code — then the
