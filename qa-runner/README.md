@@ -21,7 +21,7 @@ launchd: qa-poller   (every 15 s, cheap — no claude)
        └─ commands: `status` → live run + open PRs; `directives` → the queue;
           `pause`/`resume`
 
-launchd: qa-runner   (05:00 daily)
+launchd: qa-runner   (01:00 daily)
   └─ run-daily.sh
        ├─ (skip if paused)
        ├─ sync-merged.sh   → rebase claude/continuous-ux onto development/main
