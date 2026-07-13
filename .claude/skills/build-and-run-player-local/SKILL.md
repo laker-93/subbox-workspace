@@ -25,10 +25,17 @@ stack actually serves. This requires the `build:web:development` script in
 Pick a tag that won't collide with real release tags — append `-local`, e.g.
 `v1.2.0-local`. If the user gives you a different tag, use that instead.
 
+Build for **this laptop's architecture**. The local dev machine is Apple Silicon
+(arm64), so build `--platform linux/arm64` to run natively in the local stack —
+unlike the staging/prod release images (`/build-and-push-image`), which are
+`linux/amd64` because those hosts (Mac mini 2018 / Ubuntu droplet) are Intel/amd64.
+Building amd64 here works but runs under emulation, which is slower and pointless
+locally.
+
 ```bash
 cd ../subbox-app   # or ../feishin
 docker buildx build \
-  --platform linux/amd64 \
+  --platform linux/arm64 \
   --build-arg BUILD_MODE=development \
   -t laker93/player:<VERSION>-local \
   -f Dockerfile . \

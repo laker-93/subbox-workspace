@@ -64,9 +64,12 @@ General rules for the manual pymix flow:
 - Pick the **next version manually** (e.g. `v1.1.302` → `v1.1.303`). pymix and the
   client don't have to move in lockstep — bump whichever image changed. (The client
   tracks its own semver in `package.json`, e.g. `1.10.7`.)
-- Always build `--platform linux/amd64` (both the staging Mac mini and the prod
-  droplet, and the dev `pymix`/`player` images, run/expect amd64 — Apple Silicon
-  runs them under emulation).
+- **Match the build platform to the target host's architecture.** The manual pymix
+  flow (and the client CI images) target **staging and prod, which are both amd64**:
+  the staging **Mac mini 2018 is Intel (x86_64)** and the prod **DigitalOcean droplet
+  runs Ubuntu 24 (x86_64)**. So always build release images `--platform linux/amd64`.
+  (Local **dev** builds are the exception — this laptop is Apple Silicon; see
+  [Local builds for dev testing](#local-builds-for-dev-testing).)
 - Push both a versioned tag and `:latest` if staging/prod compose files track
   `:latest` for that image (check the compose file on the target host first —
   some pin an explicit version).
@@ -175,12 +178,15 @@ freshly-released client never calls an endpoint prod can't serve yet. See
 ## Local builds for dev testing
 
 To test a code change locally before cutting a real release, build with `--load`
-(no `--push`) so the image lands directly in the local Docker daemon:
+(no `--push`) so the image lands directly in the local Docker daemon. Build for
+**this laptop's architecture** — it's Apple Silicon, so use `--platform linux/arm64`
+to run natively in the local dev stack (building `linux/amd64` for dev works but runs
+under emulation, which is slower and unnecessary since nothing local needs amd64):
 
 ```bash
 cd ../pymix    # or ../subbox-app
 docker buildx build \
-  --platform linux/amd64 \
+  --platform linux/arm64 \
   -t laker93/pymix:vX.Y.Z \
   -f Dockerfile . \
   --load

@@ -134,8 +134,10 @@ source — editing `../pymix-qa` does nothing until you rebuild. To verify a fix
 1. Check the shared `pymix` container is idle first (`docker logs pymix --tail 50`)
    — **the user may be manually testing against it simultaneously.** If anything's
    in-flight, log the fix as ready-but-unverified and move on; don't restart it.
-2. `docker buildx build --platform linux/amd64 ... -t laker93/pymix:qa-local -f
-   Dockerfile . --load` from `../pymix-qa`.
+2. `docker buildx build --platform linux/arm64 ... -t laker93/pymix:qa-local -f
+   Dockerfile . --load` from `../pymix-qa` (`linux/arm64` — this laptop is Apple
+   Silicon; the local build runs natively, unlike the amd64 staging/prod release
+   images).
 3. Point the traefik compose `pymix` service at `laker93/pymix:qa-local`,
    `docker compose up -d pymix`, confirm clean startup (Alembic ran).
 4. Note in `log.md` that you swapped the running container's tag.
