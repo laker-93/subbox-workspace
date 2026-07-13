@@ -77,11 +77,41 @@ can be a large multi-step journey; the loop breaks it into sub-steps across
 cycles and only retires it to `directives-archive.md` (a one-line + link entry)
 once verified end-to-end.
 
+## Where the bugs are — prioritize the subbox surface
+
+subbox-app is a **fork of Feishin**, which was mature and heavily tested before
+the fork. The upstream surface it inherits — plain library browsing (albums,
+artists, album-artists, songs, genres, folders), search, radio, home/explore,
+playback, the now-playing queue, theming, routing — is battle-tested and rarely
+where a real bug lives. **The bugs are overwhelmingly in the functionality
+bolted on top**, i.e. anything that talks to pymix or moves audio around:
+
+- **Uploading music** — the watch-dir uploader (Sync → Watch), and the
+  wishlist → Soulseek → watch-dir import path.
+- **Deleting tracks** — song context menu → "Delete song" → `DELETE {pymix}/track`
+  by `subbox_id`.
+- **Downloading tracks locally** — sync plan/preview → download & extract into the
+  local library.
+- **Sync** as a whole (`/sync/*`), including watch-vs-download concurrency.
+- **Rekordbox/Serato import-export**, **wishlist**, **sharing**, **filebrowser**,
+  and the subbox-specific bits of settings.
+- **Everything in pymix** — the entire backend is subbox-custom, so a pymix cycle
+  is high-yield by default.
+
+So when the loop is choosing its own ground (checklist tiers and self-directed
+discovery below), **weight the subbox-only surface far above the upstream one.**
+Drive an upstream-only area only as a cheap regression check or when a realistic
+journey passes through it — never grind upstream browsing/search cycle after cycle
+while a subbox flow sits unchecked. The checklists in each worktree README tag which
+rows are subbox-only vs. inherited-from-upstream to make this call mechanical.
+
 ## One cycle, in order
 
 1. **Pick the work** — first match wins: client `directives.md` IN PROGRESS →
    PENDING → an `OPEN` entry in either `bugs.md`/`ux-notes.md` → next unchecked
-   item on a README coverage checklist → **self-directed discovery** (once all
+   item on a README coverage checklist (**prefer a subbox-only row over an
+   upstream-Feishin one — see "Where the bugs are" above**) → **self-directed
+   discovery** (once all
    of the above are exhausted): a regression sweep of the oldest-verified
    feature, edge/error-state probing of a covered happy path, and expanding the
    checklist with sub-flows it finds. So the loop never runs dry — with no user

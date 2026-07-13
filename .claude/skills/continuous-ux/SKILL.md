@@ -16,6 +16,22 @@ technically "working"), and conservatively fix what you can verify. **No new
 features, no refactors, no redesigns.** You improve what exists; you don't
 add to it.
 
+**Where to aim: the subbox-only surface, not upstream Feishin.** subbox-app is a
+fork of Feishin, which was mature and heavily tested before the fork. The inherited
+upstream surface — plain library browsing (albums, artists, album-artists, songs,
+genres, folders), search, radio, home/explore, playback, the now-playing queue,
+theming, routing — is battle-tested and is almost never where a real bug is. The
+bugs live in the **functionality bolted on top**: uploading music (watch-dir
+uploader, wishlist import), deleting tracks (`DELETE {pymix}/track` by `subbox_id`),
+downloading tracks locally (sync plan → download & extract), sync as a whole,
+Rekordbox/Serato import-export, wishlist, sharing, filebrowser, the subbox-specific
+settings — and **all of pymix** (the entire backend is subbox-custom). When you're
+choosing your own ground (Step 1 tiers 4–5), **weight these far above upstream-only
+areas.** Only drive an upstream-only area as a cheap regression check or when a
+realistic journey happens to pass through it — never grind upstream browsing/search
+while a subbox flow sits unchecked. The README checklists tag which rows are
+subbox-only vs. upstream so this is a mechanical call.
+
 ## Where things live
 
 - Client worktree: `../feishin-qa` (or `../subbox-app-qa` if renamed), branch
@@ -48,14 +64,23 @@ to `directives-archive.md`, which you never need to read (it's inert history).
 3. **`bugs.md` / `ux-notes.md` → OPEN**, in either journal. Pick one (prefer
    ones flagged as likely-fixable over ones flagged as needing a design
    call). Re ­verify it's still reproducible before attempting a fix.
-4. **Coverage checklist** in either README — pick the next unchecked item.
-   Alternate between client-only areas, backend-only workflows, and
+4. **Coverage checklist** in either README — pick the next unchecked item,
+   **preferring a subbox-only row (tagged `[subbox]`) over an upstream-Feishin
+   one (tagged `[upstream]`)** per the mission note above; an unchecked subbox
+   flow beats an unchecked upstream one even if the upstream one is higher in the
+   list. Alternate between client-only areas, backend-only workflows, and
    cross-cutting journeys that touch both; don't grind the same repo for many
-   cycles in a row if the other has unchecked items.
+   cycles in a row if the other has unchecked items. (All of pymix is
+   subbox-custom, so every `pymix-qa` row is inherently high-yield.)
 5. **Self-directed discovery** (nothing above left — no directive, no OPEN
    item, every checklist row is `[x]`). You are never out of work; generate
    your own. Skim the last ~10 `log.md` lines first so you don't repeat a
-   recent cycle, then pick the **least-recently-exercised** of these, rotating:
+   recent cycle, then pick the **least-recently-exercised** of these, rotating —
+   but keep the **subbox-over-upstream weighting** from the mission note: bias
+   regression sweeps and edge-probing toward the subbox surface (upload, delete,
+   local download, sync, wishlist, import-export, sharing, filebrowser, pymix), and
+   treat re-driving an upstream-only browse/search path as low-priority filler you
+   reach for only when the subbox areas were all exercised recently:
    - **Regression sweep.** Re-drive the feature whose `features/*.md` was
      verified longest ago (or one whose code moved — `sync-merged.sh` rebases
      onto the updated base each run, so a just-merged PR is prime ground).
