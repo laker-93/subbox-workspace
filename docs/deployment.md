@@ -71,7 +71,8 @@ General rules for the manual pymix flow:
   (Local **dev** builds of the `player` image are the exception — this laptop is
   Apple Silicon, so build those `linux/arm64`. **`pymix` is *not* an exception: it
   can only build `linux/amd64`** — its `taglib` dependency won't compile under an
-  arm64 build — so even locally pymix is built amd64 and runs under emulation. See
+  arm64 build ([laker-93/pymix#27](https://github.com/laker-93/pymix/issues/27)) —
+  so even locally pymix is built amd64 and runs under emulation. See
   [Local builds for dev testing](#local-builds-for-dev-testing).)
 - Push both a versioned tag and `:latest` if staging/prod compose files track
   `:latest` for that image (check the compose file on the target host first —
@@ -191,7 +192,8 @@ to build depends on the image:
   laptop.** pymix's `taglib` dependency fails to compile under an `linux/arm64`
   build, so pymix can only be built as amd64 and then **runs under emulation** on
   Apple Silicon. This is slower than a native build, but it's the only option until
-  the taglib/arm64 build issue is resolved.
+  the taglib/arm64 build issue is resolved
+  ([laker-93/pymix#27](https://github.com/laker-93/pymix/issues/27)).
 
 ```bash
 # player (arm64 — native on this laptop)

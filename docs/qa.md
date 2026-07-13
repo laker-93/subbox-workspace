@@ -137,7 +137,8 @@ source — editing `../pymix-qa` does nothing until you rebuild. To verify a fix
 2. `docker buildx build --platform linux/amd64 ... -t laker93/pymix:qa-local -f
    Dockerfile . --load` from `../pymix-qa`. **pymix must be built `linux/amd64` even
    on this arm64 laptop** — its `taglib` dependency won't compile under an arm64
-   build, so pymix builds as amd64 and runs under emulation locally.
+   build ([laker-93/pymix#27](https://github.com/laker-93/pymix/issues/27)), so
+   pymix builds as amd64 and runs under emulation locally.
 3. Point the traefik compose `pymix` service at `laker93/pymix:qa-local`,
    `docker compose up -d pymix`, confirm clean startup (Alembic ran).
 4. Note in `log.md` that you swapped the running container's tag.

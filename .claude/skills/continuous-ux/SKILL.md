@@ -162,8 +162,8 @@ Prefer the fastest loop that still reflects real behavior:
      laker93/pymix:qa-local -f Dockerfile . --load` from `../pymix-qa`
      (mirrors the "Local builds for dev testing" flow in
      `docs/deployment.md` — pymix must build `linux/amd64` even on this
-     arm64 laptop, since its `taglib` dependency won't compile under arm64;
-     it runs under emulation locally).
+     arm64 laptop, since its `taglib` dependency won't compile under arm64
+     (laker-93/pymix#27); it runs under emulation locally).
   3. Point `../traefik/docker-compose.yml`'s `pymix` service at
      `laker93/pymix:qa-local`, `docker compose up -d pymix`, confirm clean
      startup (`docker logs pymix --tail 40`, Alembic migration ran).
