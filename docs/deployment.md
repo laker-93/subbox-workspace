@@ -68,7 +68,10 @@ General rules for the manual pymix flow:
   flow (and the client CI images) target **staging and prod, which are both amd64**:
   the staging **Mac mini 2018 is Intel (x86_64)** and the prod **DigitalOcean droplet
   runs Ubuntu 24 (x86_64)**. So always build release images `--platform linux/amd64`.
-  (Local **dev** builds are the exception — this laptop is Apple Silicon; see
+  (Local **dev** builds of the `player` image are the exception — this laptop is
+  Apple Silicon, so build those `linux/arm64`. **`pymix` is *not* an exception: it
+  can only build `linux/amd64`** — its `taglib` dependency won't compile under an
+  arm64 build — so even locally pymix is built amd64 and runs under emulation. See
   [Local builds for dev testing](#local-builds-for-dev-testing).)
 - Push both a versioned tag and `:latest` if staging/prod compose files track
   `:latest` for that image (check the compose file on the target host first —
@@ -178,15 +181,31 @@ freshly-released client never calls an endpoint prod can't serve yet. See
 ## Local builds for dev testing
 
 To test a code change locally before cutting a real release, build with `--load`
-(no `--push`) so the image lands directly in the local Docker daemon. Build for
-**this laptop's architecture** — it's Apple Silicon, so use `--platform linux/arm64`
-to run natively in the local dev stack (building `linux/amd64` for dev works but runs
-under emulation, which is slower and unnecessary since nothing local needs amd64):
+(no `--push`) so the image lands directly in the local Docker daemon. Which platform
+to build depends on the image:
+
+- **`player` (subbox-app)** — build for **this laptop's architecture**. It's Apple
+  Silicon, so use `--platform linux/arm64` to run natively (building `linux/amd64`
+  for dev works but runs under emulation, slower and unnecessary here).
+- **`pymix`** — ⚠️ **must be built `--platform linux/amd64`, even on this arm64
+  laptop.** pymix's `taglib` dependency fails to compile under an `linux/arm64`
+  build, so pymix can only be built as amd64 and then **runs under emulation** on
+  Apple Silicon. This is slower than a native build, but it's the only option until
+  the taglib/arm64 build issue is resolved.
 
 ```bash
-cd ../pymix    # or ../subbox-app
+# player (arm64 — native on this laptop)
+cd ../subbox-app
 docker buildx build \
   --platform linux/arm64 \
+  -t laker93/player:vX.Y.Z-local \
+  -f Dockerfile . \
+  --load
+
+# pymix (amd64 only — taglib won't build arm64; runs under emulation locally)
+cd ../pymix
+docker buildx build \
+  --platform linux/amd64 \
   -t laker93/pymix:vX.Y.Z \
   -f Dockerfile . \
   --load

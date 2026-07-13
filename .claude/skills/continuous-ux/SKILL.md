@@ -158,11 +158,12 @@ Prefer the fastest loop that still reflects real behavior:
      in use by the user's own manual testing at the same time you're
      running.** If anything looks in-flight, don't restart it this cycle —
      log the fix as ready-but-unverified in `bugs.md` and move on.
-  2. `docker buildx build --platform linux/arm64 --build-arg ... -t
+  2. `docker buildx build --platform linux/amd64 --build-arg ... -t
      laker93/pymix:qa-local -f Dockerfile . --load` from `../pymix-qa`
      (mirrors the "Local builds for dev testing" flow in
-     `docs/deployment.md` — `linux/arm64` because this laptop is Apple
-     Silicon and the local build runs natively).
+     `docs/deployment.md` — pymix must build `linux/amd64` even on this
+     arm64 laptop, since its `taglib` dependency won't compile under arm64;
+     it runs under emulation locally).
   3. Point `../traefik/docker-compose.yml`'s `pymix` service at
      `laker93/pymix:qa-local`, `docker compose up -d pymix`, confirm clean
      startup (`docker logs pymix --tail 40`, Alembic migration ran).
