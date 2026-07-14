@@ -56,8 +56,8 @@ synchronous result for import/export — model it as job + poll on both sides.
   prefix.
 - **User resolution.** Send the `session_id` cookie (with credentials) or a
   `username`. The backend's routers copy a guard block verbatim to resolve the user —
-  match it when you add a route. (`../pymix/docs/api.md`,
-  `../pymix/CLAUDE.md` "User resolution pattern".)
+  match it when you add a route. (`../pymix/docs/api.md` "Conventions for adding an
+  endpoint".)
 - **Response shape is not uniform.** Older pymix endpoints return a plain dict
   `{"success": bool, "reason": str, ...}` and swallow errors into `reason`; newer
   ones (`track.py`, `sync.py`) use Pydantic models and raise `HTTPException`. Mirror

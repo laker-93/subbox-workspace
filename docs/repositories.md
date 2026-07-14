@@ -40,7 +40,7 @@ decisions.
 **Its docs (read these for client work):**
 | File | Covers |
 |---|---|
-| `../subbox-app/CLAUDE.md` | Orientation, runtime contexts, where things live, add-a-feature cheat sheet, conventions, gotchas. |
+| `../subbox-app/CLAUDE.md` | Orientation + load-bearing invariants (pnpm, `pnpm lint`, `/@/`, fork discipline, Navidrome/Subsonic-only) and gotchas. |
 | `../subbox-app/docs/ARCHITECTURE.md` | Process model, the music-server `ControllerEndpoint` abstraction, subbox-specific services (pymix/filebrowser), state, routing, build targets. |
 | `../subbox-app/docs/ENV_SETTINGS.md` | Env-driven settings for web/Docker first-run. |
 
@@ -63,7 +63,7 @@ The package name `pymix` is legacy; the product is "subbox" (`sub-box.net`).
 **Its docs (read these for backend work):**
 | File | Covers |
 |---|---|
-| `../pymix/CLAUDE.md` | Orientation, the `subbox_id` concept, architecture paragraph, load-bearing conventions, rough edges, do-nots. |
+| `../pymix/CLAUDE.md` | Orientation + invariants (`subbox_id`, DI, prod safety) and code rough edges. |
 | `../pymix/docs/architecture.md` | Layers, DI wiring, lifespan/watcher, per-user container topology, external services, a request-flow example. |
 | `../pymix/docs/api.md` | Every HTTP endpoint by router. |
 | `../pymix/docs/data-model.md` | DB tables, domain models, the `subbox_id` mapping. |

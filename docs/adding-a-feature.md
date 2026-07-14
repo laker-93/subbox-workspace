@@ -23,8 +23,8 @@ Read the relevant repo docs **before** reading source, then find the closest exi
 feature and mirror it:
 
 - subbox-app: pick a sibling under `src/renderer/features/<x>/` and copy its
-  `routes/queries/mutations/components` shape. The add-a-feature cheat sheet in
-  `../subbox-app/CLAUDE.md` lists the four common shapes.
+  `routes/queries/mutations/components` shape. `../subbox-app/docs/ARCHITECTURE.md`
+  (§1–§3) walks the common feature shapes.
 - pymix: trace one existing request flow end to end
   (`../pymix/docs/architecture.md` has a worked example) before adding a
   parallel one.

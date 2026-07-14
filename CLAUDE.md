@@ -1,110 +1,56 @@
 # Subbox Workspace — cross-repo entry point
 
-This repo is **not** an application. It is the orientation layer Claude reads first
-when making changes to the **subbox** platform, which is split across two sibling
-repositories checked out alongside this one.
+This repo is **not** an application. It is the orientation layer to read first when
+working on **subbox**, a self-hosted music platform with DJ-workflow features: it moves
+a user's library and playlist structure between DJ software (Rekordbox, Serato) and
+Subsonic (served by Navidrome), and plays it back through a desktop/web client.
 
-## What subbox is
-
-Subbox is a self-hosted music platform with DJ-workflow features. It lets a user
-move their library and playlist structure **between DJ software (Rekordbox, Serato)
-and Subsonic** (served by Navidrome), and play it back through a desktop/web client.
-
-It has two halves:
+Subbox has two halves that meet at one HTTP seam (the **pymix API**):
 
 | Half | Repo | What it is |
 |---|---|---|
-| **Client** | `subbox-app` | Electron + React 19 desktop/web music player (fork of Feishin). The UI for browsing, playback, sync, sharing. |
-| **Backend** | `pymix` | FastAPI ETL service. Converts libraries between Rekordbox/Serato and Subsonic; orchestrates per-user Docker stacks (Navidrome, beets, filebrowser). |
+| **Client** | `subbox-app` (`../subbox-app`, cloned as `../feishin` on this machine) | Electron + React 19 desktop/web player (fork of Feishin). Browsing, playback, sync, sharing UI. |
+| **Backend** | `pymix` (`../pymix`) | FastAPI ETL service. Converts libraries between Rekordbox/Serato and Subsonic; orchestrates per-user Docker stacks. |
 
-The client calls the backend over HTTP (the **pymix API**). That HTTP seam is the
-single integration point between the two repos — see `docs/integration.md`.
+Two more siblings support them: `../subbox-slskd` (standalone Soulseek wishlist
+downloader, a pymix-API client) and `../traefik` (the docker-compose dev stack). The
+repos, their remotes, paths, and per-repo doc indexes are all in `docs/repositories.md`.
 
-## Where the repos live
-
-Both repos are **siblings of this one**, one level up. Always resolve them with
-relative paths — they may be cloned at a different root, and under a different
-directory name, on another machine.
-
-```
-<workspace-root>/
-├── subbox-workspace/   ← you are here (cross-repo docs only)
-├── subbox-app/         ← ../subbox-app   (Electron/React client; "subbox-app" on GitHub)
-├── pymix/              ← ../pymix        (FastAPI backend)
-├── subbox-slskd/       ← ../subbox-slskd (standalone slskd/Soulseek wishlist tooling)
-└── traefik/            ← ../traefik      (local dev stack: Traefik + compose)
-```
-
-From this repo: `../subbox-app` and `../pymix`. A third sibling, `../traefik`
-(`git@github.com:laker-93/traefik.git`), holds the docker-compose stack used to run
-the whole platform locally for dev — see `docs/deployment.md`. A fourth,
-`../subbox-slskd` (`git@github.com:laker-93/subbox-slskd.git`), holds standalone
-Soulseek (slskd) scripts that download the wishlist tracks a user doesn't yet own —
-it talks to the pymix wishlist API but ships separately so it can be handed to end
-users on its own. See `docs/repositories.md`.
-
-**Naming note:** the client repo is `laker-93/subbox-app` on GitHub (a fork of
-`jeffvli/feishin`), but on **this machine** it's cloned as `../feishin`, not
-`../subbox-app`. If `../subbox-app` doesn't exist, check `../feishin` — same repo,
-just an older directory name carried over from before the fork was renamed.
-
-## Read order when starting a task
+## Read order
 
 1. **This file** — what the platform is and how the repos relate.
-2. **`docs/repositories.md`** — the repos (two core + the `subbox-slskd` satellite),
-   their relative paths, and where each repo's own detailed docs live.
-3. **`docs/architecture.md`** — the system end to end (client → pymix API → per-user
-   containers).
-4. **`docs/integration.md`** — the pymix HTTP seam: how a renderer call reaches a
-   FastAPI route, and what must change in lockstep on both sides.
-5. **`docs/adding-a-feature.md`** — the concrete cross-repo workflow for shipping a
-   feature.
-6. **`docs/deployment.md`** — the dev/staging/prod environments, the
-   `laker93/pymix` and `laker93/player` images, and how to build and deploy them.
-7. **`docs/qa.md`** — the QA architecture in layers: the `continuous-ux` loop and
-   its `../pymix-qa` / `../feishin-qa` worktrees + journals, **and** the reusable
-   substrate under it — the `scripts/qa/` drivers (`QA_APP_ENTRY`/`resolveAppEntry`)
-   and `test-<feature>` skills you share with the loop when regression-testing your
-   own feature work.
+2. `docs/repositories.md` — the repos and where each one's own docs live.
+3. `docs/architecture.md` — the system end to end (client → pymix API → per-user containers).
+4. `docs/integration.md` — the pymix HTTP seam, and what must change in lockstep on both sides.
+5. `docs/adding-a-feature.md` — the concrete cross-repo workflow for shipping a feature.
+6. `docs/deployment.md` — dev/staging/prod, the `laker93/pymix` and `laker93/player` images.
+7. `docs/qa.md` — the QA architecture: the `continuous-ux` loop and the reusable `scripts/qa/` substrate.
 
-Then, for repo-specific detail, **read that repo's own docs** (do not duplicate them
-here):
+Then read the target repo's own docs (`../subbox-app/`, `../pymix/`) — don't duplicate them here.
 
-- `subbox-app`: `../subbox-app/CLAUDE.md`, `../subbox-app/docs/ARCHITECTURE.md`,
-  `../subbox-app/docs/ENV_SETTINGS.md`.
-- `pymix`: `../pymix/CLAUDE.md`, `../pymix/docs/{architecture,api,data-model,workflows,dev}.md`.
-
-## Division of labour (where does my change go?)
+## Where does my change go?
 
 | Change | Repo(s) |
 |---|---|
 | Playback, UI, routing, theming, stores | `subbox-app` only |
-| Library transform (RB/Serato ↔ Subsonic), import/export, container orchestration, DB schema | `pymix` only |
-| A user-facing feature backed by new server work (e.g. a new sync option, a new export format) | **both** — pymix endpoint + subbox-app pymix API client/UI. See `docs/integration.md`. |
+| Library transform (RB/Serato ↔ Subsonic), import/export, orchestration, DB schema | `pymix` only |
+| A user-facing feature backed by new server work (new sync option, export format, …) | **both** — pymix endpoint + subbox-app client/UI (`docs/integration.md`) |
 | Music-server capability (Navidrome/Subsonic) | `subbox-app` only (the `ControllerEndpoint` abstraction) |
-| slskd/Soulseek run-and-install scripts, or the wishlist downloader that fetches missing tracks | `subbox-slskd` only (standalone; consumes the pymix wishlist API over HTTP) |
-| QA / continuous-UX loop work (driving the app, logging & conservatively fixing bugs and UX friction) | the `../pymix-qa` / `../feishin-qa` worktrees on branch `claude/continuous-ux`, via the `continuous-ux` skill. See `docs/qa.md`. |
-| Regression-testing a feature you're building (drive a QA journey against your working-tree code) | reuse the QA drivers: run `../feishin-qa/scripts/qa/*.mjs` with `QA_APP_ENTRY` pointing at your build, or invoke the matching `test-<feature>` skill. See `docs/qa.md` → "Reusing the framework beyond the loop". |
+| slskd/Soulseek run + wishlist-download scripts | `subbox-slskd` only (consumes the pymix wishlist API over HTTP) |
+| QA / continuous-UX loop work | the `../pymix-qa` / `../feishin-qa` worktrees on `claude/continuous-ux` (`docs/qa.md`) |
 
-## Working principles for this platform
+## Working principles
 
-- **Don't duplicate repo docs here.** This workspace holds only cross-cutting,
-  project-wide context. Anything specific to one repo belongs in that repo's docs;
-  link to it instead of copying.
-- **`subbox_id` is the cross-system track identity.** A `SUBBOX_ID` UUID is written
-  into each file's tags and survives transcoding, re-tagging, and moves between
-  systems. Almost all track-level logic in pymix keys off it. Never introduce an
+- **Don't duplicate repo docs here.** This workspace holds only cross-cutting context;
+  anything specific to one repo belongs in that repo's docs — link to it instead of copying.
+- **Cross-repo changes ship together.** A pymix endpoint change and its subbox-app client
+  change are one logical feature — plan and review them as a pair (`docs/integration.md`).
+- **`subbox_id` is the cross-system track identity** — a UUID tagged into every file that
+  survives moves between systems; almost all pymix track logic keys off it. Never add an
   ingest path that skips tagging. (Detail: `../pymix/CLAUDE.md`.)
-- **subbox-app is a fork of Feishin.** When touching shared/feature code, match
-  upstream patterns so future merges stay clean. Subbox-only code (pymix, sync,
-  sharing, filebrowser integration) has no upstream.
 - **The client only ever targets Navidrome/Subsonic.** A Jellyfin controller exists
-  (inherited from upstream Feishin) but Subbox will never run against Jellyfin —
-  do not let Jellyfin capabilities or limitations influence design decisions. New
-  music-server features need only work on Navidrome/Subsonic; implementing the
-  Jellyfin side is optional dead code kept only for merge cleanliness.
-- **Cross-repo changes ship together.** A pymix endpoint change and its subbox-app
-  client change are one logical feature; plan and review them as a pair.
+  (inherited from Feishin) but Subbox will never run against it — don't let it shape design.
+- **subbox-app is a fork of Feishin.** Match upstream patterns in shared code so future
+  merges stay clean. Subbox-only code (pymix, sync, sharing, filebrowser) has no upstream.
 - **Treat any live instance as production.** Neither repo has a separate prod safety
-  harness. Don't write to a running DB or user containers without explicit
-  confirmation.
+  harness — don't write to a running DB or user containers without explicit confirmation.

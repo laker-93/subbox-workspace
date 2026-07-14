@@ -72,7 +72,7 @@ the mounted `/subbox` volume. Authoritative table:
 Every audio file carries a `SUBBOX_ID` UUID in its tags. It is the stable identity of
 a track across Rekordbox, Serato, Navidrome, transcoding, and beets re-imports —
 nearly all track-level backend logic keys off it. Any new ingest path must tag files.
-Authoritative detail: `../pymix/CLAUDE.md` ("The one concept you must understand").
+Authoritative detail: `../pymix/docs/data-model.md` ("The `subbox_id` lifecycle").
 
 ## Data flow of a track (import)
 

@@ -23,11 +23,11 @@
     <string>/Users/lukepurnell/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
 
-  <!-- Run once a day at 01:00. If the Mac is asleep at 01:00, launchd runs it
+  <!-- Run once a day at 02:00. If the Mac is asleep at 02:00, launchd runs it
        on next wake. -->
   <key>StartCalendarInterval</key>
   <dict>
-    <key>Hour</key><integer>1</integer>
+    <key>Hour</key><integer>2</integer>
     <key>Minute</key><integer>0</integer>
   </dict>
 
