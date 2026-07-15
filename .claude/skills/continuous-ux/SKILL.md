@@ -282,6 +282,40 @@ Prefer the fastest loop that still reflects real behavior:
 - Append one line to `log.md`.
 - Kill any Electron process / dangling browser context you launched.
 
+## Keep the context lean (token discipline)
+
+A cycle is expensive in one specific way: **every turn re-reads your entire
+accumulated context**, so anything a tool dumps into the transcript is paid for
+again on every subsequent turn — and long cycles run hundreds of turns. The
+dominant cost is not any single call; it's large tool outputs staying pinned ×
+many turns. Two cheap habits cut it materially:
+
+- **Bash output discipline.** Never dump a large blob when a slice answers the
+  question. Default to bounding output: `docker logs pymix --tail 30` (not the
+  full log), `grep -m1`/`grep -c` instead of a full match dump, `head`/`tail` on
+  file or query output, `pytest -q`, `| tail -n 40` on build/install output. For
+  a **poll loop** (waiting on a scan/import/download), emit only the matched line
+  when the condition flips — not the whole window each iteration. A driver's
+  own `Promise.race` result + a one-line summary is enough; don't also cat its
+  verbose stdout.
+- **Read discipline.** To check one function or symbol in a source file, use
+  `Grep` (or `Read` with `offset`/`limit`) to pull just that region — don't
+  `Read` a whole multi-hundred-line component to see one handler. The journals
+  are the exception: they're kept small precisely so you can read them whole.
+- **Screenshots are fine.** Reading a Playwright PNG to inspect the UI costs
+  only a bounded vision-token amount — don't avoid visual checks on token grounds.
+
+**Maintain the journals so they stay cheap to read** (they're re-read every turn
+of every cycle — see the rules in each file's header):
+
+- `log.md`: when it passes ~15 entries, move the oldest block **verbatim** to
+  `log-archive.md` (which the loop never reads) and note that you rotated.
+- `bugs.md` / `ux-notes.md`: keep them to `OPEN` entries plus the compact
+  **Closed** index. When you fix a bug (or mark a note RESOLVED/IMPROVED), move
+  its full text to `bugs-archive.md` / `ux-notes-archive.md` and leave **one
+  line** in the Closed index — never let a verbose closed entry sit in the hot
+  file. (`directives.md` already works this way via `directives-archive.md`.)
+
 ## Hard limits (repeated from the journals — do not relax)
 
 - Bug fixes and small UX improvements only. Never new features/refactors/redesigns.
