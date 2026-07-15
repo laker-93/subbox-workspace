@@ -121,9 +121,12 @@ fixed. Before the cycle's main work, reconcile; it's a couple of `gh` calls per
 repo and keeps `bugs.md` honest:
 
 - **Backfill.** Any OPEN `bugs.md` entry **without** an `Issue:` link (an older
-  bug, or one logged before this was wired up) → file one now with
-  `../subbox-workspace/qa-runner/open-issue.sh <that worktree> "<summary>"
-  "<repro/evidence>"` and add the `Issue:` line. Every open bug must be tracked.
+  bug, one logged before this was wired up, or one from a cycle that crashed
+  after filing but before committing — see the note on `open-issue.sh` below) →
+  file one now with `../subbox-workspace/qa-runner/open-issue.sh <that worktree>
+  "<summary>" "<repro/evidence>" "<dedup-key>"` and add the `Issue:` line
+  **immediately, as its own small commit** (don't defer it to the cycle's final
+  commit — see Step 3). Every open bug must be tracked.
 - **Close-out.** For each OPEN entry **with** an `Issue:` link, check the issue —
   `gh issue view <n> --repo <slug> --json state -q .state`. If it's `CLOSED`, the
   fix reached the base: either a QA PR you opened got merged, **or the user fixed
@@ -234,9 +237,23 @@ Prefer the fastest loop that still reflects real behavior:
     or not you can also fix it this cycle. Check the matching `bugs.md` entry
     doesn't already carry an `Issue:` link (if it does, it's already filed — do
     **not** re-file). Otherwise run `../subbox-workspace/qa-runner/open-issue.sh
-    <that worktree path> "<one-line summary>" "<repro + evidence + hypothesis>"`
-    — it files the issue on the real repo (labelled `qa-bug`) and prints the URL.
-    Paste that URL into the `bugs.md` entry as an `Issue: <url>` line. The daily
+    <that worktree path> "<one-line summary>" "<repro + evidence + hypothesis>"
+    "<dedup-key>"` — `<dedup-key>` is a short, stable string for the code area
+    (an endpoint like `"POST /rekordbox/export"`, or a function/file ref like
+    `"rekordbox_export"`) that would show up in a *future* cycle's repro for the
+    same bug even if the title/wording differs; the script searches open `qa-bug`
+    issues for it first and hands back an existing match instead of filing a
+    duplicate. It files the issue on the real repo (labelled `qa-bug`) and prints
+    the URL either way. **Immediately** — before doing anything else this cycle —
+    paste that URL into the `bugs.md` entry as an `Issue: <url>` line and commit
+    just that journal edit on its own. Do not defer this to the cycle's final
+    commit: a cycle that crashes or times out later (headless `claude -p` runs can
+    be killed mid-cycle) would otherwise leave the issue filed on GitHub with zero
+    trace in the journal, and the next fresh-context cycle — which only trusts
+    `bugs.md` — would rediscover the same bug and file a real duplicate (this is
+    exactly how pymix#32 and #33 happened: both are the same `rekordbox_export`
+    bug). The GitHub-side search in `open-issue.sh` is the backstop for when this
+    still happens anyway; committing immediately is what makes it rare. The daily
     digest links every issue filed this run. (A pure UX-friction note in
     `ux-notes.md` does not need an issue — this is for `bugs.md` correctness bugs.)
   - Confidently root-caused, scoped, single-repo, and you can fully

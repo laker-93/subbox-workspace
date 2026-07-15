@@ -250,12 +250,18 @@ When a directive has the loop build a durable new driver, it should wrap it as a
   cross-repo fix opens **two PRs, cross-linked and merged together.**
 - **Every bug is tracked as a GitHub issue.** When the loop logs a bug in a
   `bugs.md`, it files an issue (`qa-runner/open-issue.sh`, label `qa-bug`) on the
-  real repo and records the URL as an `Issue:` line in the entry. A fix commit/PR
-  carries `Closes #<n>`, so merging it closes the issue — an open `qa-bug` issue
-  means "still broken in the base". Each cycle reconciles: any OPEN `bugs.md` entry
-  whose issue is now closed (a merged QA PR **or** a fix you pushed to the main
-  checkout yourself) is re-verified and moved to `FIXED`. This is how a bug you fix
-  by hand gets picked up and closed out without editing the journal manually.
+  real repo and records the URL as an `Issue:` line in the entry, **committed
+  immediately** rather than deferred to the cycle's final commit — a cycle that
+  crashes/times out later would otherwise leave the issue orphaned on GitHub with
+  no journal trace, and the next cycle would rediscover and re-file the same bug
+  (`open-issue.sh` also self-checks GitHub for an existing open `qa-bug` issue
+  matching a dedup key before creating one, as a backstop for when this still
+  happens). A fix commit/PR carries `Closes #<n>`, so merging it closes the
+  issue — an open `qa-bug` issue means "still broken in the base". Each cycle
+  reconciles: any OPEN `bugs.md` entry whose issue is now closed (a merged QA PR
+  **or** a fix you pushed to the main checkout yourself) is re-verified and moved
+  to `FIXED`. This is how a bug you fix by hand gets picked up and closed out
+  without editing the journal manually.
 - **Never touch staging or prod.** Local dev stack only. Never run destructive DB
   ops or write to a real user's per-user container.
 - **Never bypass `SUBBOX_ID` tagging** on the pymix side (see root `CLAUDE.md`).

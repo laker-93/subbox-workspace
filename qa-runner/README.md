@@ -37,10 +37,16 @@ first every cycle**, so a phone message just becomes a PENDING directive.
 
 ## The bug → issue → PR → merge → sync flow
 
-0. Loop finds a bug → `open-issue.sh` files **one GitHub issue** on the real repo
-   (label `qa-bug`) and the loop records its URL as an `Issue:` line in `bugs.md`.
-   **Every bug gets an issue**, whether or not it's fixed the same cycle; the
-   `Issue:` link is the dedup key, so a later fresh-context cycle never re-files it.
+0. Loop finds a bug → `open-issue.sh` files a GitHub issue on the real repo
+   (label `qa-bug`) — after first checking GitHub itself for an existing open
+   `qa-bug` issue matching a caller-supplied dedup key, returning that instead of
+   filing a new one if found — and the loop **immediately commits** the URL as an
+   `Issue:` line in `bugs.md` (its own small commit, not deferred to the cycle's
+   final commit). **Every bug gets an issue**, whether or not it's fixed the same
+   cycle; the `Issue:` link is the primary dedup key so a later fresh-context
+   cycle never re-files it, and the GitHub-side search is the backstop for when a
+   cycle crashes between filing and committing (this is how pymix#32 and #33 —
+   the same bug, filed twice — happened; see `open-issue.sh`'s header comment).
    Issues filed this run are listed (linked) in the Discord digest.
 1. Loop fixes it, **verifies before committing** (re-drives the exact flow;
    cross-repo = both sides live). Commits to `claude/continuous-ux` with a
