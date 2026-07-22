@@ -21,7 +21,7 @@ fi
 : "${QA_DISCORD_CHANNEL_ID:?set QA_DISCORD_CHANNEL_ID in config.env}"
 : "${DISCORD_BOT_TOKEN:?DISCORD_BOT_TOKEN not found (discord-credentials.env)}"
 : "${QA_CYCLES:=6}"
-: "${QA_MODEL:=claude-opus-4-8}"
+: "${QA_MODEL:=claude-sonnet-5}"
 
 STATE_DIR="$QA_DIR/state"
 mkdir -p "$STATE_DIR"
